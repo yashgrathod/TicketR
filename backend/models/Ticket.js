@@ -4,6 +4,12 @@ const noteSchema = new mongoose.Schema({
   note_text: {
     type: String,
     required: true
+  },
+  senderRole: {
+    type: String,
+    enum: ['Customer', 'Agent'],
+    required: true,
+    default: 'Agent'
   }
 }, { timestamps: true });
 

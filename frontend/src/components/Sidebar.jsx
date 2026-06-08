@@ -8,7 +8,7 @@ const Sidebar = () => {
   const { role, toggleRole, customerEmail } = useRole();
 
   const navItems = [
-    { name: 'Command Center', path: '/', icon: Command },
+    { name: 'Dashboard', path: '/', icon: Command },
     { name: 'Settings', path: '/settings', icon: Settings },
     { name: 'Help', path: '/help', icon: HelpCircle },
   ];

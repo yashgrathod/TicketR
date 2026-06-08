@@ -89,7 +89,7 @@ exports.getTicketById = async (req, res) => {
 // @route   PUT /api/tickets/:id
 exports.updateTicket = async (req, res) => {
   try {
-    const { status, priority, category, note_text } = req.body;
+    const { status, priority, category, note_text, senderRole } = req.body;
     
     const ticket = await Ticket.findOne({
       $or: [
@@ -107,7 +107,7 @@ exports.updateTicket = async (req, res) => {
     if (category) ticket.category = category;
     
     if (note_text) {
-      ticket.notes.push({ note_text });
+      ticket.notes.push({ note_text, senderRole: senderRole || 'Agent' });
     }
     
     await ticket.save();

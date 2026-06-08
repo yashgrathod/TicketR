@@ -110,6 +110,7 @@ const AnalyticsDashboard = ({ tickets }) => {
               <Tooltip 
                 cursor={{ fill: '#27272a' }}
                 contentStyle={{ backgroundColor: '#18181b', border: '1px solid #27272a', borderRadius: '8px', color: '#fff' }}
+                itemStyle={{ color: '#fff' }}
               />
               <Bar dataKey="count" radius={[4, 4, 0, 0]} barSize={32}>
                 {priorityData.map((entry, index) => (

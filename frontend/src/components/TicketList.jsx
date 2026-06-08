@@ -102,22 +102,26 @@ const TicketList = () => {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-zinc-800/50 pb-6">
           <div>
-            <h1 className="text-3xl font-bold text-zinc-100 tracking-tight">Command Center</h1>
+            <h1 className="text-3xl font-bold text-zinc-100 tracking-tight">
+              {role === 'Agent' ? 'Dashboard' : 'My Support Tickets'}
+            </h1>
             <p className="text-zinc-400 text-sm mt-1.5">
               {role === 'Agent' ? 'Manage and resolve customer requests globally.' : 'Track and manage your support tickets.'}
             </p>
           </div>
-          <button 
-            onClick={() => setIsModalOpen(true)}
-            className="flex items-center gap-2 bg-zinc-100 hover:bg-white text-zinc-950 px-5 py-2.5 rounded-xl text-sm font-semibold hover:scale-[1.02] active:scale-98 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] shadow-[0_0_20px_rgba(255,255,255,0.1)]"
-          >
-            <Plus className="w-4 h-4" />
-            New Ticket
-          </button>
+          {role === 'Customer' && (
+            <button 
+              onClick={() => setIsModalOpen(true)}
+              className="flex items-center gap-2 bg-zinc-100 hover:bg-white text-zinc-950 px-5 py-2.5 rounded-xl text-sm font-semibold hover:scale-[1.02] active:scale-98 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] shadow-[0_0_20px_rgba(255,255,255,0.1)]"
+            >
+              <Plus className="w-4 h-4" />
+              New Ticket
+            </button>
+          )}
         </div>
 
         {/* Dashboard Analytics */}
-        <AnalyticsDashboard tickets={tickets} />
+        {role === 'Agent' && <AnalyticsDashboard tickets={tickets} />}
 
         {/* Filters */}
         <div className="flex flex-col sm:flex-row gap-4">

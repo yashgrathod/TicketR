@@ -27,10 +27,16 @@ const TicketDetail = () => {
   const [updating, setUpdating] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const fileInputRef = useRef(null);
+  const chatEndRef = useRef(null);
 
   useEffect(() => {
     fetchTicket();
   }, [id]);
+
+  useEffect(() => {
+    // Scroll to bottom of chat when messages change
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [ticket?.notes]);
 
   const fetchTicket = async () => {
     try {
@@ -61,7 +67,7 @@ const TicketDetail = () => {
     if (!noteText.trim()) return;
     setUpdating(true);
     try {
-      const updated = await updateTicket(ticket._id, { note_text: noteText });
+      const updated = await updateTicket(ticket._id, { note_text: noteText, senderRole: role });
       setTicket(updated);
       setNoteText('');
       setSelectedFile(null);
@@ -76,6 +82,7 @@ const TicketDetail = () => {
   if (error || !ticket) return <div className="p-16 text-center text-rose-500 text-sm">{error || 'Ticket not found'}</div>;
 
   const cfg = statusConfig[ticket.status];
+  const pCfg = priorityConfig[ticket.priority || 'Medium'];
   const isAgent = role === 'Agent';
 
   return (
@@ -86,7 +93,7 @@ const TicketDetail = () => {
         <div>
           <Link to="/" className="inline-flex items-center gap-2 text-zinc-500 hover:text-white transition-all duration-300 font-medium text-sm mb-6 hover:-translate-x-1">
             <ArrowLeft className="w-4 h-4" />
-            Back to Command Center
+            {isAgent ? 'Back to Dashboard' : 'Back to My Tickets'}
           </Link>
           
           <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
@@ -107,38 +114,51 @@ const TicketDetail = () => {
               <div className="flex items-center justify-between gap-4 p-3 rounded-xl bg-zinc-900/40 backdrop-blur-md border border-zinc-800/80">
                 <span className="text-xs font-bold uppercase tracking-widest text-zinc-500">Status</span>
                 <div className="relative">
-                  <select
-                    value={ticket.status}
-                    onChange={(e) => handleUpdate('status', e.target.value)}
-                    disabled={updating || !isAgent}
-                    className={`appearance-none pl-3 pr-8 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider border focus:outline-none focus:ring-1 focus:ring-zinc-500 transition-all cursor-pointer ${cfg.bg} ${cfg.text} ${cfg.border} ${!isAgent && 'opacity-80 cursor-not-allowed'}`}
-                  >
-                    <option value="Open">Open</option>
-                    <option value="In Progress">In Progress</option>
-                    <option value="Closed">Closed</option>
-                  </select>
+                  {isAgent ? (
+                    <select
+                      value={ticket.status}
+                      onChange={(e) => handleUpdate('status', e.target.value)}
+                      disabled={updating}
+                      className={`appearance-none pl-3 pr-8 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider border focus:outline-none focus:ring-1 focus:ring-zinc-500 transition-all cursor-pointer ${cfg.bg} ${cfg.text} ${cfg.border}`}
+                    >
+                      <option value="Open">Open</option>
+                      <option value="In Progress">In Progress</option>
+                      <option value="Closed">Closed</option>
+                    </select>
+                  ) : (
+                    <div className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider border ${cfg.bg} ${cfg.text} ${cfg.border}`}>
+                      {ticket.status}
+                    </div>
+                  )}
                 </div>
               </div>
 
-              {/* Priority & Category (Agent Only controls) */}
-              {isAgent && (
-                <div className="flex flex-col gap-2 p-3 rounded-xl bg-zinc-900/40 backdrop-blur-md border border-zinc-800/80">
-                  <div className="flex items-center justify-between gap-4">
-                    <span className="text-xs font-bold uppercase tracking-widest text-zinc-500">Priority</span>
+              {/* Priority */}
+              <div className="flex flex-col gap-2 p-3 rounded-xl bg-zinc-900/40 backdrop-blur-md border border-zinc-800/80">
+                <div className="flex items-center justify-between gap-4">
+                  <span className="text-xs font-bold uppercase tracking-widest text-zinc-500">Priority</span>
+                  {isAgent ? (
                     <select
                       value={ticket.priority}
                       onChange={(e) => handleUpdate('priority', e.target.value)}
                       disabled={updating}
-                      className={`text-xs rounded-lg px-2 py-1 focus:ring-1 focus:ring-zinc-500 outline-none border ${priorityConfig[ticket.priority || 'Medium']}`}
+                      className={`text-xs font-semibold rounded-lg px-2 py-1 focus:ring-1 focus:ring-zinc-500 outline-none border ${pCfg}`}
                     >
                       <option className="bg-zinc-900 text-zinc-300" value="Low">Low</option>
                       <option className="bg-zinc-900 text-zinc-300" value="Medium">Medium</option>
                       <option className="bg-zinc-900 text-zinc-300" value="High">High</option>
                       <option className="bg-zinc-900 text-zinc-300" value="Critical">Critical</option>
                     </select>
-                  </div>
-                  <div className="flex items-center justify-between gap-4">
-                    <span className="text-xs font-bold uppercase tracking-widest text-zinc-500">Category</span>
+                  ) : (
+                    <div className={`px-2 py-1 rounded-lg text-xs font-semibold border ${pCfg}`}>
+                      {ticket.priority || 'Medium'}
+                    </div>
+                  )}
+                </div>
+                {/* Category - Only Agent Can Edit/See fully, but let's show read-only for customer */}
+                <div className="flex items-center justify-between gap-4 mt-2 border-t border-zinc-800/50 pt-2">
+                  <span className="text-xs font-bold uppercase tracking-widest text-zinc-500">Category</span>
+                  {isAgent ? (
                     <select
                       value={ticket.category}
                       onChange={(e) => handleUpdate('category', e.target.value)}
@@ -150,9 +170,13 @@ const TicketDetail = () => {
                       <option value="Billing">Billing</option>
                       <option value="Account">Account</option>
                     </select>
-                  </div>
+                  ) : (
+                    <div className="text-zinc-300 text-xs font-semibold">
+                      {ticket.category || 'General'}
+                    </div>
+                  )}
                 </div>
-              )}
+              </div>
             </div>
           </div>
         </div>
@@ -189,93 +213,105 @@ const TicketDetail = () => {
           </div>
         )}
 
-        {/* Notes (Agent Only) */}
-        {isAgent && (
-          <div className="space-y-6 pt-6 border-t border-zinc-800/50">
-            <h3 className="text-sm font-bold text-white flex items-center gap-2 uppercase tracking-widest">
-              <MessageSquare className="w-4 h-4 text-zinc-500" />
-              Internal Notes
-            </h3>
-            
-            <div className="space-y-4">
-              {ticket.notes && ticket.notes.length > 0 ? (
-                ticket.notes.map((note) => (
-                  <div key={note._id} className="bg-zinc-900/40 backdrop-blur-md p-5 rounded-2xl shadow-lg border border-zinc-800/80 flex gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-white flex-shrink-0 flex items-center justify-center font-bold text-zinc-950 text-sm shadow-[0_0_10px_rgba(255,255,255,0.2)]">
-                      AG
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="font-bold text-white text-sm">Agent Note</span>
-                        <span className="text-xs text-zinc-500 font-medium">
-                          {new Date(note.createdAt).toLocaleString()}
-                        </span>
+        {/* Conversation Chat Interface */}
+        <div className="flex flex-col pt-6 border-t border-zinc-800/50 min-h-[400px]">
+          <h3 className="text-sm font-bold text-white flex items-center gap-2 uppercase tracking-widest mb-6">
+            <MessageSquare className="w-4 h-4 text-zinc-500" />
+            Conversation
+          </h3>
+          
+          {/* Messages Area */}
+          <div className="flex-1 space-y-6 mb-6 overflow-y-auto max-h-[500px] pr-2 custom-scrollbar">
+            {ticket.notes && ticket.notes.length > 0 ? (
+              ticket.notes.map((note) => {
+                const isMine = note.senderRole === role;
+                // If it's old data and missing senderRole, treat Agent as default sender for agents, else neutral
+                const senderRole = note.senderRole || 'Agent'; 
+                const isAgentMsg = senderRole === 'Agent';
+
+                return (
+                  <div key={note._id} className={`flex ${isMine ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`max-w-[80%] flex flex-col ${isMine ? 'items-end' : 'items-start'}`}>
+                      <div className="flex items-center gap-2 mb-1.5 px-1">
+                        <span className="text-xs font-bold text-zinc-400">{isAgentMsg ? 'Support Agent' : 'Customer'}</span>
+                        <span className="text-[10px] text-zinc-600 font-medium">{new Date(note.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
                       </div>
-                      <p className="text-zinc-400 text-sm leading-relaxed">{note.note_text}</p>
+                      <div 
+                        className={`p-4 rounded-2xl text-sm leading-relaxed shadow-lg ${
+                          isMine 
+                            ? 'bg-blue-600 text-white rounded-br-sm' 
+                            : 'bg-zinc-800/80 text-zinc-200 border border-zinc-700/50 rounded-bl-sm'
+                        }`}
+                      >
+                        {note.note_text}
+                      </div>
                     </div>
                   </div>
-                ))
-              ) : (
-                <div className="text-center py-10 text-zinc-600 text-sm bg-zinc-900/20 rounded-2xl border border-zinc-800/50 border-dashed font-medium">
-                  No internal notes yet. Use the area below to add one.
-                </div>
-              )}
-            </div>
+                );
+              })
+            ) : (
+              <div className="h-full flex flex-col items-center justify-center py-12 text-zinc-500 text-sm bg-zinc-900/20 rounded-2xl border border-zinc-800/50 border-dashed">
+                <MessageSquare className="w-8 h-8 mb-3 text-zinc-700" />
+                <p>No messages yet. Send a message to start the conversation.</p>
+              </div>
+            )}
+            <div ref={chatEndRef} />
+          </div>
 
-            <form onSubmit={handleAddNote} className="mt-6 bg-zinc-900/40 backdrop-blur-md p-2 rounded-2xl shadow-lg border border-zinc-800/80 focus-within:ring-1 focus-within:ring-zinc-600 focus-within:border-zinc-600 transition-all flex flex-col gap-2">
-              <textarea
-                value={noteText}
-                onChange={(e) => setNoteText(e.target.value)}
-                placeholder="Type a private internal note..."
-                className="w-full max-h-32 min-h-[44px] py-3 px-4 bg-transparent border-none focus:ring-0 resize-none outline-none text-zinc-200 text-sm placeholder-zinc-600"
-                rows={2}
-              />
-              
-              {selectedFile && (
-                <div className="flex items-center gap-2 text-xs text-zinc-300 bg-zinc-800/50 px-3 py-1.5 rounded mx-2 mt-1 w-max">
-                  <span className="truncate max-w-[150px]">{selectedFile.name}</span>
-                  <button 
-                    type="button" 
-                    onClick={() => { setSelectedFile(null); if (fileInputRef.current) fileInputRef.current.value = ''; }}
-                    className="text-zinc-500 hover:text-rose-400"
-                  >
-                    <X className="w-3 h-3" />
-                  </button>
-                </div>
-              )}
-
-              <div className="flex justify-between items-center px-2 pb-1 mt-1">
+          {/* Chat Input */}
+          <form onSubmit={handleAddNote} className="bg-zinc-900/80 backdrop-blur-md p-3 rounded-2xl shadow-xl border border-zinc-800 focus-within:border-zinc-600 transition-colors flex flex-col gap-2">
+            <textarea
+              value={noteText}
+              onChange={(e) => setNoteText(e.target.value)}
+              placeholder="Type your message here..."
+              className="w-full max-h-32 min-h-[44px] py-2 px-3 bg-transparent border-none focus:ring-0 resize-none outline-none text-zinc-200 text-sm placeholder-zinc-500"
+              rows={2}
+            />
+            
+            {selectedFile && (
+              <div className="flex items-center gap-2 text-xs text-zinc-300 bg-zinc-800/50 px-3 py-1.5 rounded mx-2 mt-1 w-max">
+                <span className="truncate max-w-[150px]">{selectedFile.name}</span>
                 <button 
                   type="button" 
-                  onClick={() => fileInputRef.current?.click()}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+                  onClick={() => { setSelectedFile(null); if (fileInputRef.current) fileInputRef.current.value = ''; }}
+                  className="text-zinc-500 hover:text-rose-400 transition-colors"
                 >
-                  <Paperclip className="w-4 h-4" />
-                  Attach File
-                </button>
-                <input 
-                  type="file" 
-                  ref={fileInputRef} 
-                  className="hidden" 
-                  onChange={(e) => {
-                    if (e.target.files && e.target.files[0]) {
-                      setSelectedFile(e.target.files[0]);
-                      alert("File ready for upload (Mock)");
-                    }
-                  }}
-                />
-                
-                <button
-                  type="submit"
-                  disabled={updating || !noteText.trim()}
-                  className="px-4 py-2 bg-white text-zinc-950 rounded-xl hover:bg-zinc-200 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] disabled:opacity-50 disabled:cursor-not-allowed font-bold text-sm hover:scale-[1.05] active:scale-95 shadow-[0_0_15px_rgba(255,255,255,0.1)] flex items-center gap-2"
-                >
-                  <Send className="w-4 h-4" /> Send Note
+                  <X className="w-3 h-3" />
                 </button>
               </div>
-            </form>
-          </div>
-        )}
+            )}
+
+            <div className="flex justify-between items-center px-1">
+              <button 
+                type="button" 
+                onClick={() => fileInputRef.current?.click()}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+              >
+                <Paperclip className="w-4 h-4" />
+                <span className="hidden sm:inline">Attach</span>
+              </button>
+              <input 
+                type="file" 
+                ref={fileInputRef} 
+                className="hidden" 
+                onChange={(e) => {
+                  if (e.target.files && e.target.files[0]) {
+                    setSelectedFile(e.target.files[0]);
+                    alert("File ready for upload (Mock)");
+                  }
+                }}
+              />
+              
+              <button
+                type="submit"
+                disabled={updating || !noteText.trim()}
+                className="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl transition-all duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed font-bold text-sm shadow-[0_0_15px_rgba(37,99,235,0.2)] hover:shadow-[0_0_20px_rgba(37,99,235,0.4)] flex items-center gap-2 active:scale-95"
+              >
+                <Send className="w-4 h-4" /> Send
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );
