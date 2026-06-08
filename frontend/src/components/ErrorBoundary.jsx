@@ -1,0 +1,43 @@
+import React from 'react';
+
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    // Update state so the next render will show the fallback UI.
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    // Log the error to the console (or to an error reporting service like Sentry)
+    console.error('Error caught by ErrorBoundary:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 text-gray-800 p-6">
+          <div className="max-w-md w-full bg-white shadow-lg rounded-lg p-8 text-center">
+            <h1 className="text-2xl font-bold text-red-600 mb-4">Something went wrong.</h1>
+            <p className="text-gray-600 mb-6 text-sm overflow-auto text-left bg-gray-100 p-2 rounded">
+              {this.state.error && this.state.error.toString()}
+            </p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+            >
+              Refresh Page
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
+export default ErrorBoundary;
