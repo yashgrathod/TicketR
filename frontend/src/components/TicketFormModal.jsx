@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 import { createTicket } from '../api';
 import { useRole } from '../context/RoleContext';
@@ -15,6 +15,8 @@ const TicketFormModal = ({ isOpen, onClose, onTicketCreated }) => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -45,6 +47,7 @@ const TicketFormModal = ({ isOpen, onClose, onTicketCreated }) => {
         priority: 'Medium',
         category: 'General'
       });
+      setSelectedFile(null);
       onTicketCreated();
       onClose();
     } catch (err) {
@@ -162,21 +165,56 @@ const TicketFormModal = ({ isOpen, onClose, onTicketCreated }) => {
             />
           </div>
 
-          <div className="pt-4 flex justify-end gap-3 border-t border-zinc-800/80">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-5 py-2.5 text-zinc-400 text-sm font-semibold hover:text-white rounded-xl transition-colors hover:bg-zinc-800"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="px-6 py-2.5 bg-white text-zinc-950 text-sm font-bold rounded-xl hover:bg-zinc-200 focus:ring-2 focus:ring-zinc-400 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] disabled:opacity-50 hover:scale-[1.02] active:scale-98 shadow-[0_0_15px_rgba(255,255,255,0.1)]"
-            >
-              {loading ? 'Creating...' : 'Submit Ticket'}
-            </button>
+          <div className="pt-4 flex justify-between items-start border-t border-zinc-800/80">
+            <div className="flex flex-col gap-2">
+              <input 
+                type="file" 
+                ref={fileInputRef} 
+                className="hidden" 
+                onChange={(e) => {
+                  if (e.target.files && e.target.files[0]) {
+                    setSelectedFile(e.target.files[0]);
+                    alert("File ready for upload (Mock)");
+                  }
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors self-start"
+              >
+                <svg className="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+                Attach File
+              </button>
+              {selectedFile && (
+                <div className="flex items-center gap-2 text-xs text-zinc-300 bg-zinc-800/50 px-2 py-1 rounded">
+                  <span className="truncate max-w-[150px]">{selectedFile.name}</span>
+                  <button 
+                    type="button" 
+                    onClick={() => { setSelectedFile(null); if (fileInputRef.current) fileInputRef.current.value = ''; }}
+                    className="text-zinc-500 hover:text-rose-400"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              )}
+            </div>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-5 py-2.5 text-zinc-400 text-sm font-semibold hover:text-white rounded-xl transition-colors hover:bg-zinc-800"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={loading}
+                className="px-6 py-2.5 bg-white text-zinc-950 text-sm font-bold rounded-xl hover:bg-zinc-200 focus:ring-2 focus:ring-zinc-400 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] disabled:opacity-50 hover:scale-[1.02] active:scale-98 shadow-[0_0_15px_rgba(255,255,255,0.1)]"
+              >
+                {loading ? 'Creating...' : 'Submit Ticket'}
+              </button>
+            </div>
           </div>
         </form>
       </div>

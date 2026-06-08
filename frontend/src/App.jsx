@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import TicketList from './components/TicketList';
 import TicketDetail from './components/TicketDetail';
+import Settings from './components/Settings';
 import { RoleProvider } from './context/RoleContext';
 
 function App() {
@@ -15,7 +16,7 @@ function App() {
             <Routes>
               <Route path="/" element={<TicketList />} />
               <Route path="/tickets/:id" element={<TicketDetail />} />
-              <Route path="/settings" element={<div className="p-8"><h1 className="text-2xl font-bold">Settings</h1><p className="mt-4 text-zinc-500">Settings page placeholder.</p></div>} />
+              <Route path="/settings" element={<Settings />} />
               <Route path="/help" element={<div className="p-8"><h1 className="text-2xl font-bold">Help & Support</h1><p className="mt-4 text-zinc-500">Help page placeholder.</p></div>} />
             </Routes>
           </main>

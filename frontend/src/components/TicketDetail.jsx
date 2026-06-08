@@ -1,13 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, MessageSquare, Send, User, Tag, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, MessageSquare, Send, User, Paperclip, X } from 'lucide-react';
 import { getTicketById, updateTicket } from '../api';
 import { useRole } from '../context/RoleContext';
 
 const statusConfig = {
-  'Open': { dot: 'bg-rose-500', text: 'text-rose-400', bg: 'bg-rose-500/10', border: 'border-rose-500/20' },
-  'In Progress': { dot: 'bg-amber-500', text: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/20' },
-  'Closed': { dot: 'bg-emerald-500', text: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20' }
+  'Open': { text: 'text-zinc-300', bg: 'bg-white/5', border: 'border-white/10' },
+  'In Progress': { text: 'text-zinc-300', bg: 'bg-white/5', border: 'border-white/10' },
+  'Closed': { text: 'text-zinc-300', bg: 'bg-white/5', border: 'border-white/10' }
+};
+
+const priorityConfig = {
+  'Low': 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
+  'Medium': 'text-yellow-400 bg-yellow-500/10 border-yellow-500/20',
+  'High': 'text-rose-400 bg-rose-500/10 border-rose-500/20',
+  'Critical': 'text-red-600 bg-red-600/10 border-red-600/20'
 };
 
 const TicketDetail = () => {
@@ -18,6 +25,8 @@ const TicketDetail = () => {
   const [error, setError] = useState(null);
   const [noteText, setNoteText] = useState('');
   const [updating, setUpdating] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     fetchTicket();
@@ -55,6 +64,7 @@ const TicketDetail = () => {
       const updated = await updateTicket(ticket._id, { note_text: noteText });
       setTicket(updated);
       setNoteText('');
+      setSelectedFile(null);
     } catch (err) {
       alert('Failed to add note');
     } finally {
@@ -101,13 +111,12 @@ const TicketDetail = () => {
                     value={ticket.status}
                     onChange={(e) => handleUpdate('status', e.target.value)}
                     disabled={updating || !isAgent}
-                    className={`appearance-none pl-7 pr-8 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider border focus:outline-none focus:ring-1 focus:ring-zinc-500 transition-all cursor-pointer ${cfg.bg} ${cfg.text} ${cfg.border} ${!isAgent && 'opacity-80 cursor-not-allowed'}`}
+                    className={`appearance-none pl-3 pr-8 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider border focus:outline-none focus:ring-1 focus:ring-zinc-500 transition-all cursor-pointer ${cfg.bg} ${cfg.text} ${cfg.border} ${!isAgent && 'opacity-80 cursor-not-allowed'}`}
                   >
                     <option value="Open">Open</option>
                     <option value="In Progress">In Progress</option>
                     <option value="Closed">Closed</option>
                   </select>
-                  <div className={`absolute left-2.5 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full ${cfg.dot} shadow-[0_0_5px_currentColor]`} />
                 </div>
               </div>
 
@@ -120,12 +129,12 @@ const TicketDetail = () => {
                       value={ticket.priority}
                       onChange={(e) => handleUpdate('priority', e.target.value)}
                       disabled={updating}
-                      className="bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs rounded-lg px-2 py-1 focus:ring-1 focus:ring-zinc-500 outline-none"
+                      className={`text-xs rounded-lg px-2 py-1 focus:ring-1 focus:ring-zinc-500 outline-none border ${priorityConfig[ticket.priority || 'Medium']}`}
                     >
-                      <option value="Low">Low</option>
-                      <option value="Medium">Medium</option>
-                      <option value="High">High</option>
-                      <option value="Critical">Critical</option>
+                      <option className="bg-zinc-900 text-zinc-300" value="Low">Low</option>
+                      <option className="bg-zinc-900 text-zinc-300" value="Medium">Medium</option>
+                      <option className="bg-zinc-900 text-zinc-300" value="High">High</option>
+                      <option className="bg-zinc-900 text-zinc-300" value="Critical">Critical</option>
                     </select>
                   </div>
                   <div className="flex items-center justify-between gap-4">
@@ -165,6 +174,21 @@ const TicketDetail = () => {
           </div>
         </div>
 
+        {/* Attachments (Placeholder) */}
+        {ticket.attachments && ticket.attachments.length > 0 && (
+          <div className="bg-zinc-900/40 backdrop-blur-md rounded-2xl shadow-2xl border border-zinc-800/80 p-6">
+            <h4 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-4">Attachments</h4>
+            <div className="flex gap-3">
+              {ticket.attachments.map((url, i) => (
+                <a key={i} href={url} target="_blank" rel="noreferrer" className="flex items-center gap-2 px-3 py-2 bg-zinc-800/50 hover:bg-zinc-700/50 border border-zinc-700/50 rounded-lg text-sm text-zinc-300 transition-colors">
+                  <Paperclip className="w-4 h-4" />
+                  Attachment {i + 1}
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Notes (Agent Only) */}
         {isAgent && (
           <div className="space-y-6 pt-6 border-t border-zinc-800/50">
@@ -198,21 +222,57 @@ const TicketDetail = () => {
               )}
             </div>
 
-            <form onSubmit={handleAddNote} className="mt-6 bg-zinc-900/40 backdrop-blur-md p-2 rounded-2xl shadow-lg border border-zinc-800/80 focus-within:ring-1 focus-within:ring-zinc-600 focus-within:border-zinc-600 transition-all flex items-end gap-3">
+            <form onSubmit={handleAddNote} className="mt-6 bg-zinc-900/40 backdrop-blur-md p-2 rounded-2xl shadow-lg border border-zinc-800/80 focus-within:ring-1 focus-within:ring-zinc-600 focus-within:border-zinc-600 transition-all flex flex-col gap-2">
               <textarea
                 value={noteText}
                 onChange={(e) => setNoteText(e.target.value)}
                 placeholder="Type a private internal note..."
-                className="flex-1 max-h-32 min-h-[44px] py-3 px-4 bg-transparent border-none focus:ring-0 resize-none outline-none text-zinc-200 text-sm placeholder-zinc-600"
-                rows={1}
+                className="w-full max-h-32 min-h-[44px] py-3 px-4 bg-transparent border-none focus:ring-0 resize-none outline-none text-zinc-200 text-sm placeholder-zinc-600"
+                rows={2}
               />
-              <button
-                type="submit"
-                disabled={updating || !noteText.trim()}
-                className="p-3 bg-white text-zinc-950 rounded-xl hover:bg-zinc-200 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] disabled:opacity-50 disabled:cursor-not-allowed mb-0.5 mr-0.5 hover:scale-[1.05] active:scale-95 shadow-[0_0_15px_rgba(255,255,255,0.1)]"
-              >
-                <Send className="w-4 h-4" />
-              </button>
+              
+              {selectedFile && (
+                <div className="flex items-center gap-2 text-xs text-zinc-300 bg-zinc-800/50 px-3 py-1.5 rounded mx-2 mt-1 w-max">
+                  <span className="truncate max-w-[150px]">{selectedFile.name}</span>
+                  <button 
+                    type="button" 
+                    onClick={() => { setSelectedFile(null); if (fileInputRef.current) fileInputRef.current.value = ''; }}
+                    className="text-zinc-500 hover:text-rose-400"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              )}
+
+              <div className="flex justify-between items-center px-2 pb-1 mt-1">
+                <button 
+                  type="button" 
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+                >
+                  <Paperclip className="w-4 h-4" />
+                  Attach File
+                </button>
+                <input 
+                  type="file" 
+                  ref={fileInputRef} 
+                  className="hidden" 
+                  onChange={(e) => {
+                    if (e.target.files && e.target.files[0]) {
+                      setSelectedFile(e.target.files[0]);
+                      alert("File ready for upload (Mock)");
+                    }
+                  }}
+                />
+                
+                <button
+                  type="submit"
+                  disabled={updating || !noteText.trim()}
+                  className="px-4 py-2 bg-white text-zinc-950 rounded-xl hover:bg-zinc-200 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] disabled:opacity-50 disabled:cursor-not-allowed font-bold text-sm hover:scale-[1.05] active:scale-95 shadow-[0_0_15px_rgba(255,255,255,0.1)] flex items-center gap-2"
+                >
+                  <Send className="w-4 h-4" /> Send Note
+                </button>
+              </div>
             </form>
           </div>
         )}

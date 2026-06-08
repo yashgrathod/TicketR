@@ -1,21 +1,29 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, Filter, Plus, ChevronRight, AlertCircle, Clock, CheckCircle2 } from 'lucide-react';
+import { Search, Filter, Plus, ChevronRight, ArrowUp, ArrowDown } from 'lucide-react';
 import { getTickets } from '../api';
 import TicketFormModal from './TicketFormModal';
+import AnalyticsDashboard from './AnalyticsDashboard';
 import { useRole } from '../context/RoleContext';
 
 const statusConfig = {
-  'Open': { dot: 'bg-rose-500', text: 'text-rose-400', bg: 'bg-rose-500/10', border: 'border-rose-500/20' },
-  'In Progress': { dot: 'bg-amber-500', text: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/20' },
-  'Closed': { dot: 'bg-emerald-500', text: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20' }
+  'Open': { text: 'text-zinc-300', bg: 'bg-white/5', border: 'border-white/10' },
+  'In Progress': { text: 'text-zinc-300', bg: 'bg-white/5', border: 'border-white/10' },
+  'Closed': { text: 'text-zinc-300', bg: 'bg-white/5', border: 'border-white/10' }
 };
 
 const priorityConfig = {
-  'Low': 'text-zinc-400 bg-zinc-800/50 border-zinc-700/50',
-  'Medium': 'text-blue-400 bg-blue-500/10 border-blue-500/20',
-  'High': 'text-orange-400 bg-orange-500/10 border-orange-500/20',
-  'Critical': 'text-rose-400 bg-rose-500/10 border-rose-500/20'
+  'Low': 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
+  'Medium': 'text-yellow-400 bg-yellow-500/10 border-yellow-500/20',
+  'High': 'text-rose-400 bg-rose-500/10 border-rose-500/20',
+  'Critical': 'text-red-600 bg-red-600/10 border-red-600/20'
+};
+
+const priorityWeight = {
+  'Low': 1,
+  'Medium': 2,
+  'High': 3,
+  'Critical': 4
 };
 
 const TicketList = () => {
@@ -25,6 +33,7 @@ const TicketList = () => {
   const [status, setStatus] = useState('All');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [sortConfig, setSortConfig] = useState({ key: 'createdAt', direction: 'desc' });
 
   const fetchTickets = useCallback(async () => {
     setLoading(true);
@@ -46,6 +55,46 @@ const TicketList = () => {
     return () => clearTimeout(timer);
   }, [fetchTickets]);
 
+  const handleSort = (key) => {
+    let direction = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const sortedTickets = useMemo(() => {
+    let sortableItems = [...tickets];
+    if (sortConfig !== null) {
+      sortableItems.sort((a, b) => {
+        let aValue = a[sortConfig.key];
+        let bValue = b[sortConfig.key];
+
+        if (sortConfig.key === 'priority') {
+          aValue = priorityWeight[aValue || 'Medium'];
+          bValue = priorityWeight[bValue || 'Medium'];
+        } else if (sortConfig.key === 'createdAt') {
+          aValue = new Date(aValue).getTime();
+          bValue = new Date(bValue).getTime();
+        }
+
+        if (aValue < bValue) {
+          return sortConfig.direction === 'asc' ? -1 : 1;
+        }
+        if (aValue > bValue) {
+          return sortConfig.direction === 'asc' ? 1 : -1;
+        }
+        return 0;
+      });
+    }
+    return sortableItems;
+  }, [tickets, sortConfig]);
+
+  const SortIcon = ({ columnKey }) => {
+    if (sortConfig.key !== columnKey) return null;
+    return sortConfig.direction === 'asc' ? <ArrowUp className="w-3 h-3 inline-block ml-1" /> : <ArrowDown className="w-3 h-3 inline-block ml-1" />;
+  };
+
   return (
     <div className="flex-1 overflow-auto bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] bg-zinc-950/95 bg-blend-overlay">
       <div className="p-8 max-w-7xl mx-auto space-y-8">
@@ -66,6 +115,9 @@ const TicketList = () => {
             New Ticket
           </button>
         </div>
+
+        {/* Dashboard Analytics */}
+        <AnalyticsDashboard tickets={tickets} />
 
         {/* Filters */}
         <div className="flex flex-col sm:flex-row gap-4">
@@ -118,14 +170,18 @@ const TicketList = () => {
                     {role === 'Agent' && <th className="py-4 px-6">Customer</th>}
                     <th className="py-4 px-6">Subject</th>
                     <th className="py-4 px-6">Category</th>
-                    <th className="py-4 px-6">Priority</th>
+                    <th className="py-4 px-6 cursor-pointer hover:text-zinc-300 transition-colors" onClick={() => handleSort('priority')}>
+                      Priority <SortIcon columnKey="priority" />
+                    </th>
                     <th className="py-4 px-6">Status</th>
-                    <th className="py-4 px-6">Created</th>
+                    <th className="py-4 px-6 cursor-pointer hover:text-zinc-300 transition-colors" onClick={() => handleSort('createdAt')}>
+                      Created <SortIcon columnKey="createdAt" />
+                    </th>
                     <th className="py-4 px-6 text-right"></th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-800/50">
-                  {tickets.map((ticket) => {
+                  {sortedTickets.map((ticket) => {
                     const cfg = statusConfig[ticket.status];
                     const pCfg = priorityConfig[ticket.priority || 'Medium'];
                     return (
@@ -154,7 +210,6 @@ const TicketList = () => {
                         </td>
                         <td className="py-4 px-6">
                           <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold border ${cfg.bg} ${cfg.text} ${cfg.border}`}>
-                            <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot} shadow-[0_0_5px_currentColor]`}></span>
                             {ticket.status}
                           </div>
                         </td>

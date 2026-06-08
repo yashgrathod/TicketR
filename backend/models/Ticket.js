@@ -44,6 +44,7 @@ const ticketSchema = new mongoose.Schema({
     enum: ['General', 'Technical', 'Billing', 'Account'],
     default: 'General'
   },
+  attachments: [String],
   notes: [noteSchema]
 }, { timestamps: true });
 
