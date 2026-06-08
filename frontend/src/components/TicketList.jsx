@@ -166,22 +166,22 @@ const TicketList = () => {
               <p className="text-zinc-500 mt-1 text-sm">Adjust filters or create a new one to get started.</p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto custom-scrollbar pb-2">
               <table className="w-full text-left border-collapse whitespace-nowrap">
                 <thead>
                   <tr className="border-b border-zinc-800 text-xs font-semibold text-zinc-500 uppercase tracking-widest bg-zinc-950/50">
-                    <th className="py-4 px-6">ID</th>
-                    {role === 'Agent' && <th className="py-4 px-6">Customer</th>}
-                    <th className="py-4 px-6">Subject</th>
-                    <th className="py-4 px-6">Category</th>
-                    <th className="py-4 px-6 cursor-pointer hover:text-zinc-300 transition-colors" onClick={() => handleSort('priority')}>
+                    <th className="py-3 px-4">ID</th>
+                    {role === 'Agent' && <th className="py-3 px-4">Customer</th>}
+                    <th className="py-3 px-4">Subject</th>
+                    <th className="py-3 px-4">Category</th>
+                    <th className="py-3 px-4 cursor-pointer hover:text-zinc-300 transition-colors" onClick={() => handleSort('priority')}>
                       Priority <SortIcon columnKey="priority" />
                     </th>
-                    <th className="py-4 px-6">Status</th>
-                    <th className="py-4 px-6 cursor-pointer hover:text-zinc-300 transition-colors" onClick={() => handleSort('createdAt')}>
+                    <th className="py-3 px-4">Status</th>
+                    <th className="py-3 px-4 cursor-pointer hover:text-zinc-300 transition-colors" onClick={() => handleSort('createdAt')}>
                       Created <SortIcon columnKey="createdAt" />
                     </th>
-                    <th className="py-4 px-6 text-right"></th>
+                    <th className="py-3 px-4 text-right"></th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-800/50">
@@ -190,39 +190,39 @@ const TicketList = () => {
                     const pCfg = priorityConfig[ticket.priority || 'Medium'];
                     return (
                       <tr key={ticket._id} className="hover:bg-zinc-800/30 transition-colors group">
-                        <td className="py-4 px-6 text-sm">
+                        <td className="py-3 px-4 text-sm">
                           <span className="font-mono font-medium text-zinc-400 bg-zinc-800/50 px-2 py-1 rounded">
                             {ticket.ticket_id}
                           </span>
                         </td>
                         {role === 'Agent' && (
-                          <td className="py-4 px-6">
+                          <td className="py-3 px-4">
                             <div className="font-medium text-zinc-200 text-sm">{ticket.customer_name}</div>
                             <div className="text-xs text-zinc-500">{ticket.customer_email}</div>
                           </td>
                         )}
-                        <td className="py-4 px-6">
+                        <td className="py-3 px-4">
                           <div className="font-medium text-zinc-200 text-sm max-w-xs truncate">{ticket.subject}</div>
                         </td>
-                        <td className="py-4 px-6 text-sm text-zinc-400">
+                        <td className="py-3 px-4 text-sm text-zinc-400">
                           {ticket.category || 'General'}
                         </td>
-                        <td className="py-4 px-6">
+                        <td className="py-3 px-4">
                           <div className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold border ${pCfg}`}>
                             {ticket.priority || 'Medium'}
                           </div>
                         </td>
-                        <td className="py-4 px-6">
+                        <td className="py-3 px-4">
                           <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold border ${cfg.bg} ${cfg.text} ${cfg.border}`}>
                             {ticket.status}
                           </div>
                         </td>
-                        <td className="py-4 px-6 text-sm text-zinc-500">
+                        <td className="py-3 px-4 text-sm text-zinc-500">
                           {new Date(ticket.createdAt).toLocaleDateString('en-US', {
                             month: 'short', day: 'numeric', year: 'numeric'
                           })}
                         </td>
-                        <td className="py-4 px-6 text-right">
+                        <td className="py-3 px-4 text-right">
                           <Link 
                             to={`/tickets/${ticket._id}`}
                             className="inline-flex items-center justify-center p-2 rounded-lg text-zinc-500 hover:text-white hover:bg-zinc-800 transition-all duration-300 opacity-0 group-hover:opacity-100 focus:opacity-100 hover:scale-[1.1] active:scale-95"
