@@ -10,11 +10,22 @@ const ticketRoutes = require('./routes/tickets');
 const app = express();
 
 app.use(helmet());
+
+// Trust the reverse proxy (Render) to correctly resolve client IPs for the rate limiter
+app.set('trust proxy', 1);
+
+const allowedOrigins = [
+  process.env.FRONTEND_URL || 'https://ticketryashrathod.vercel.app',
+  'http://localhost:5173',
+  'http://localhost:3000'
+];
+
 app.use(cors({
-  origin: '*',
+  origin: allowedOrigins,
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true
 }));
+
 app.use(express.json());
 
 const apiLimiter = rateLimit({
