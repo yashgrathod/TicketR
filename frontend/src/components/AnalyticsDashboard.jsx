@@ -46,7 +46,7 @@ const AnalyticsDashboard = ({ tickets }) => {
     if (tickets.length === 0) return "Not enough data to generate insights. Gather more tickets.";
     
     // Find top category
-    const topCategory = categoryData.sort((a, b) => b.value - a.value)[0]?.name || 'General';
+    const topCategory = [...categoryData].sort((a, b) => b.value - a.value)[0]?.name || 'General';
     // Count critical tickets
     const criticalCount = priorityData.find(p => p.name === 'Critical')?.count || 0;
 

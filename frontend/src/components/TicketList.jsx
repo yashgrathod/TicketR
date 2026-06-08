@@ -35,24 +35,36 @@ const TicketList = () => {
   const [loading, setLoading] = useState(true);
   const [sortConfig, setSortConfig] = useState({ key: 'createdAt', direction: 'desc' });
 
-  const fetchTickets = useCallback(async () => {
+  const fetchTickets = useCallback(async (abortSignal) => {
     setLoading(true);
     try {
       const emailFilter = role === 'Customer' ? customerEmail : '';
       const data = await getTickets(search, status, emailFilter);
+      
+      // Cancel state update if component unmounted or role toggled rapidly
+      if (abortSignal?.aborted) return;
+      
       setTickets(data);
     } catch (error) {
+      if (abortSignal?.aborted) return;
       console.error('Error fetching tickets:', error);
     } finally {
-      setLoading(false);
+      if (!abortSignal?.aborted) {
+        setLoading(false);
+      }
     }
   }, [search, status, role, customerEmail]);
 
   useEffect(() => {
+    const controller = new AbortController();
     const timer = setTimeout(() => {
-      fetchTickets();
+      fetchTickets(controller.signal);
     }, 300);
-    return () => clearTimeout(timer);
+    
+    return () => {
+      controller.abort();
+      clearTimeout(timer);
+    };
   }, [fetchTickets]);
 
   const handleSort = (key) => {
