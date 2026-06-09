@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-
 const noteSchema = new mongoose.Schema({
   note_text: {
     type: String,
@@ -12,7 +11,6 @@ const noteSchema = new mongoose.Schema({
     default: 'Agent'
   }
 }, { timestamps: true });
-
 const ticketSchema = new mongoose.Schema({
   ticket_id: {
     type: String,
@@ -53,5 +51,4 @@ const ticketSchema = new mongoose.Schema({
   attachments: [String],
   notes: [noteSchema]
 }, { timestamps: true });
-
 module.exports = mongoose.model('Ticket', ticketSchema);

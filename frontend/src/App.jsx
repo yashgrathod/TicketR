@@ -6,7 +6,6 @@ import TicketDetail from './components/TicketDetail';
 import Settings from './components/Settings';
 import Help from './components/Help';
 import { RoleProvider } from './context/RoleContext';
-
 function App() {
   return (
     <RoleProvider>
@@ -26,5 +25,4 @@ function App() {
     </RoleProvider>
   );
 }
-
 export default App;

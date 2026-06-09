@@ -1,23 +1,19 @@
 import React, { useMemo } from 'react';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Sparkles, BarChart2, PieChart as PieIcon } from 'lucide-react';
-
 const categoryColorMap = {
-  'General': '#3b82f6',     // Blue
-  'Technical': '#6366f1',   // Indigo
-  'Billing': '#14b8a6',     // Teal
-  'Account': '#a855f7'      // Purple
+  'General': '#3b82f6',     
+  'Technical': '#6366f1',   
+  'Billing': '#14b8a6',     
+  'Account': '#a855f7'      
 };
-
 const priorityColorMap = {
-  'Low': '#10b981',         // Green
-  'Medium': '#eab308',      // Yellow
-  'High': '#f97316',        // Orange
-  'Critical': '#ef4444'     // Red
+  'Low': '#10b981',         
+  'Medium': '#eab308',      
+  'High': '#f97316',        
+  'Critical': '#ef4444'     
 };
-
 const AnalyticsDashboard = ({ tickets }) => {
-  // Process data for charts
   const categoryData = useMemo(() => {
     const counts = {};
     tickets.forEach(t => {
@@ -26,7 +22,6 @@ const AnalyticsDashboard = ({ tickets }) => {
     });
     return Object.keys(counts).map(key => ({ name: key, value: counts[key] }));
   }, [tickets]);
-
   const priorityData = useMemo(() => {
     const counts = { Low: 0, Medium: 0, High: 0, Critical: 0 };
     tickets.forEach(t => {
@@ -40,16 +35,10 @@ const AnalyticsDashboard = ({ tickets }) => {
       { name: 'Critical', count: counts.Critical }
     ];
   }, [tickets]);
-
-  // AI Insights Mock Generator
   const generateInsight = () => {
     if (tickets.length === 0) return "Not enough data to generate insights. Gather more tickets.";
-    
-    // Find top category
     const topCategory = [...categoryData].sort((a, b) => b.value - a.value)[0]?.name || 'General';
-    // Count critical tickets
     const criticalCount = priorityData.find(p => p.name === 'Critical')?.count || 0;
-
     if (criticalCount > tickets.length * 0.2) {
       return `System Health Alert: Over 20% of active tickets are Critical priority. Immediate allocation of resources to ${topCategory} tickets is recommended.`;
     } else if (topCategory === 'Technical') {
@@ -58,10 +47,8 @@ const AnalyticsDashboard = ({ tickets }) => {
       return `Status Stable: Ticket volumes are normal. The majority of inquiries are categorized as ${topCategory}. Maintain current workflow.`;
     }
   };
-
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-      {/* Category Pie Chart */}
       <div className="bg-zinc-900/40 backdrop-blur-md border border-zinc-800 rounded-2xl p-5 shadow-xl">
         <h3 className="text-sm font-bold text-zinc-300 flex items-center gap-2 mb-4">
           <PieIcon className="w-4 h-4 text-zinc-500" />
@@ -94,8 +81,6 @@ const AnalyticsDashboard = ({ tickets }) => {
           )}
         </div>
       </div>
-
-      {/* Priority Bar Chart */}
       <div className="bg-zinc-900/40 backdrop-blur-md border border-zinc-800 rounded-2xl p-5 shadow-xl">
         <h3 className="text-sm font-bold text-zinc-300 flex items-center gap-2 mb-4">
           <BarChart2 className="w-4 h-4 text-zinc-500" />
@@ -121,8 +106,6 @@ const AnalyticsDashboard = ({ tickets }) => {
           </ResponsiveContainer>
         </div>
       </div>
-
-      {/* AI Insights */}
       <div className="bg-zinc-900/40 backdrop-blur-md border border-zinc-800 rounded-2xl p-6 shadow-xl flex flex-col relative overflow-hidden">
         <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
           <Sparkles className="w-24 h-24 text-blue-500" />
@@ -143,5 +126,4 @@ const AnalyticsDashboard = ({ tickets }) => {
     </div>
   );
 };
-
 export default AnalyticsDashboard;

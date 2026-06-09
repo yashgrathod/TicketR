@@ -2,17 +2,14 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Command, Settings, HelpCircle, Shield, User } from 'lucide-react';
 import { useRole } from '../context/RoleContext';
-
 const Sidebar = () => {
   const location = useLocation();
   const { role, toggleRole, customerEmail } = useRole();
-
   const navItems = [
     { name: 'Dashboard', path: '/', icon: Command },
     { name: 'Settings', path: '/settings', icon: Settings },
     { name: 'Help', path: '/help', icon: HelpCircle },
   ];
-
   return (
     <div className="w-64 bg-zinc-950 text-zinc-100 flex flex-col h-screen border-r border-zinc-800/50 backdrop-blur-xl">
       <div className="p-6 flex items-center gap-3 border-b border-zinc-800/50">
@@ -21,7 +18,6 @@ const Sidebar = () => {
         </div>
         <span className="text-lg font-bold tracking-wide bg-gradient-to-r from-zinc-100 to-zinc-400 bg-clip-text text-transparent">TicketR</span>
       </div>
-      
       <nav className="flex-1 px-3 py-6 space-y-1">
         {navItems.map((item) => {
           const Icon = item.icon;
@@ -42,9 +38,7 @@ const Sidebar = () => {
           );
         })}
       </nav>
-      
       <div className="p-4 border-t border-zinc-800/50 space-y-4">
-        {/* Role Switcher */}
         <div className="bg-zinc-900/60 p-1 rounded-xl flex items-center border border-zinc-800/50 backdrop-blur-sm">
           <button
             onClick={toggleRole}
@@ -61,7 +55,6 @@ const Sidebar = () => {
             Agent
           </button>
         </div>
-
         <div className="flex items-center gap-3 px-2">
           <div className="w-9 h-9 rounded-full bg-zinc-800 flex items-center justify-center font-bold text-xs border border-zinc-700/50 text-zinc-300">
             {role === 'Agent' ? 'AG' : 'CU'}
@@ -75,5 +68,4 @@ const Sidebar = () => {
     </div>
   );
 };
-
 export default Sidebar;

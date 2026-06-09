@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 import { createTicket } from '../api';
 import { useRole } from '../context/RoleContext';
-
 const TicketFormModal = ({ isOpen, onClose, onTicketCreated }) => {
   const { role, customerEmail } = useRole();
   const [formData, setFormData] = useState({
@@ -17,7 +16,6 @@ const TicketFormModal = ({ isOpen, onClose, onTicketCreated }) => {
   const [error, setError] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
   const fileInputRef = useRef(null);
-
   useEffect(() => {
     if (isOpen) {
       setFormData(prev => ({
@@ -26,13 +24,10 @@ const TicketFormModal = ({ isOpen, onClose, onTicketCreated }) => {
       }));
     }
   }, [isOpen, role, customerEmail]);
-
   if (!isOpen) return null;
-
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -56,7 +51,6 @@ const TicketFormModal = ({ isOpen, onClose, onTicketCreated }) => {
       setLoading(false);
     }
   };
-
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-zinc-950 rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden border border-zinc-800/80 ring-1 ring-white/10">
@@ -72,14 +66,12 @@ const TicketFormModal = ({ isOpen, onClose, onTicketCreated }) => {
             <X className="w-5 h-5" />
           </button>
         </div>
-        
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           {error && (
             <div className="p-3 bg-rose-500/10 border border-rose-500/20 text-rose-400 rounded-lg text-sm font-medium">
               {error}
             </div>
           )}
-          
           <div className="grid grid-cols-2 gap-5">
             <div className="space-y-2">
               <label className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Customer Name</label>
@@ -107,7 +99,6 @@ const TicketFormModal = ({ isOpen, onClose, onTicketCreated }) => {
               />
             </div>
           </div>
-
           <div className="grid grid-cols-2 gap-5">
             <div className="space-y-2">
               <label className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Category</label>
@@ -138,7 +129,6 @@ const TicketFormModal = ({ isOpen, onClose, onTicketCreated }) => {
               </select>
             </div>
           </div>
-
           <div className="space-y-2">
             <label className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Subject</label>
             <input
@@ -151,7 +141,6 @@ const TicketFormModal = ({ isOpen, onClose, onTicketCreated }) => {
               placeholder="Brief summary of the issue..."
             />
           </div>
-
           <div className="space-y-2">
             <label className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Description</label>
             <textarea
@@ -164,7 +153,6 @@ const TicketFormModal = ({ isOpen, onClose, onTicketCreated }) => {
               placeholder="Provide detailed information..."
             />
           </div>
-
           <div className="pt-4 flex justify-between items-start border-t border-zinc-800/80">
             <div className="flex flex-col gap-2">
               <input 
@@ -221,5 +209,4 @@ const TicketFormModal = ({ isOpen, onClose, onTicketCreated }) => {
     </div>
   );
 };
-
 export default TicketFormModal;

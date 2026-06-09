@@ -5,27 +5,23 @@ import { getTickets } from '../api';
 import TicketFormModal from './TicketFormModal';
 import AnalyticsDashboard from './AnalyticsDashboard';
 import { useRole } from '../context/RoleContext';
-
 const statusConfig = {
   'Open': { text: 'text-zinc-300', bg: 'bg-white/5', border: 'border-white/10' },
   'In Progress': { text: 'text-zinc-300', bg: 'bg-white/5', border: 'border-white/10' },
   'Closed': { text: 'text-zinc-300', bg: 'bg-white/5', border: 'border-white/10' }
 };
-
 const priorityConfig = {
   'Low': 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
   'Medium': 'text-yellow-400 bg-yellow-500/10 border-yellow-500/20',
   'High': 'text-rose-400 bg-rose-500/10 border-rose-500/20',
   'Critical': 'text-red-600 bg-red-600/10 border-red-600/20'
 };
-
 const priorityWeight = {
   'Low': 1,
   'Medium': 2,
   'High': 3,
   'Critical': 4
 };
-
 const TicketList = () => {
   const { role, customerEmail } = useRole();
   const [tickets, setTickets] = useState([]);
@@ -34,16 +30,13 @@ const TicketList = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [sortConfig, setSortConfig] = useState({ key: 'createdAt', direction: 'desc' });
-
   const fetchTickets = useCallback(async (abortSignal) => {
     setLoading(true);
     try {
       const emailFilter = role === 'Customer' ? customerEmail : '';
       const data = await getTickets(search, status, emailFilter);
-      
       // Cancel state update if component unmounted or role toggled rapidly
       if (abortSignal?.aborted) return;
-      
       setTickets(data);
     } catch (error) {
       if (abortSignal?.aborted) return;
@@ -54,19 +47,16 @@ const TicketList = () => {
       }
     }
   }, [search, status, role, customerEmail]);
-
   useEffect(() => {
     const controller = new AbortController();
     const timer = setTimeout(() => {
       fetchTickets(controller.signal);
     }, 300);
-    
     return () => {
       controller.abort();
       clearTimeout(timer);
     };
   }, [fetchTickets]);
-
   const handleSort = (key) => {
     let direction = 'asc';
     if (sortConfig.key === key && sortConfig.direction === 'asc') {
@@ -74,14 +64,12 @@ const TicketList = () => {
     }
     setSortConfig({ key, direction });
   };
-
   const sortedTickets = useMemo(() => {
     let sortableItems = [...tickets];
     if (sortConfig !== null) {
       sortableItems.sort((a, b) => {
         let aValue = a[sortConfig.key];
         let bValue = b[sortConfig.key];
-
         if (sortConfig.key === 'priority') {
           aValue = priorityWeight[aValue || 'Medium'];
           bValue = priorityWeight[bValue || 'Medium'];
@@ -89,7 +77,6 @@ const TicketList = () => {
           aValue = new Date(aValue).getTime();
           bValue = new Date(bValue).getTime();
         }
-
         if (aValue < bValue) {
           return sortConfig.direction === 'asc' ? -1 : 1;
         }
@@ -101,17 +88,13 @@ const TicketList = () => {
     }
     return sortableItems;
   }, [tickets, sortConfig]);
-
   const SortIcon = ({ columnKey }) => {
     if (sortConfig.key !== columnKey) return null;
     return sortConfig.direction === 'asc' ? <ArrowUp className="w-3 h-3 inline-block ml-1" /> : <ArrowDown className="w-3 h-3 inline-block ml-1" />;
   };
-
   return (
     <div className="flex-1 overflow-auto bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] bg-zinc-950/95 bg-blend-overlay">
       <div className="p-8 max-w-7xl mx-auto space-y-8">
-        
-        {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-zinc-800/50 pb-6">
           <div>
             <h1 className="text-3xl font-bold text-zinc-100 tracking-tight">
@@ -131,11 +114,7 @@ const TicketList = () => {
             </button>
           )}
         </div>
-
-        {/* Dashboard Analytics */}
         {role === 'Agent' && <AnalyticsDashboard tickets={tickets} />}
-
-        {/* Filters */}
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
@@ -164,8 +143,6 @@ const TicketList = () => {
             </div>
           </div>
         </div>
-
-        {/* List */}
         <div className="backdrop-blur-md bg-zinc-900/40 border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden">
           {loading ? (
             <div className="p-16 text-center text-sm text-zinc-500 font-medium animate-pulse">Loading tickets...</div>
@@ -251,7 +228,6 @@ const TicketList = () => {
           )}
         </div>
       </div>
-
       <TicketFormModal 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
@@ -260,5 +236,4 @@ const TicketList = () => {
     </div>
   );
 };
-
 export default TicketList;

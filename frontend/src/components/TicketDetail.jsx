@@ -3,20 +3,17 @@ import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, MessageSquare, Send, User, Paperclip, X } from 'lucide-react';
 import { getTicketById, updateTicket } from '../api';
 import { useRole } from '../context/RoleContext';
-
 const statusConfig = {
   'Open': { text: 'text-zinc-300', bg: 'bg-white/5', border: 'border-white/10' },
   'In Progress': { text: 'text-zinc-300', bg: 'bg-white/5', border: 'border-white/10' },
   'Closed': { text: 'text-zinc-300', bg: 'bg-white/5', border: 'border-white/10' }
 };
-
 const priorityConfig = {
   'Low': 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
   'Medium': 'text-yellow-400 bg-yellow-500/10 border-yellow-500/20',
   'High': 'text-rose-400 bg-rose-500/10 border-rose-500/20',
   'Critical': 'text-red-600 bg-red-600/10 border-red-600/20'
 };
-
 const TicketDetail = () => {
   const { id } = useParams();
   const { role } = useRole();
@@ -28,16 +25,13 @@ const TicketDetail = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const fileInputRef = useRef(null);
   const chatEndRef = useRef(null);
-
   useEffect(() => {
     fetchTicket();
   }, [id]);
-
   useEffect(() => {
     // Scroll to bottom of chat when messages change
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [ticket?.notes]);
-
   const fetchTicket = async () => {
     try {
       const data = await getTicketById(id);
@@ -48,7 +42,6 @@ const TicketDetail = () => {
       setLoading(false);
     }
   };
-
   const handleUpdate = async (field, value) => {
     if (value === ticket[field]) return;
     setUpdating(true);
@@ -61,7 +54,6 @@ const TicketDetail = () => {
       setUpdating(false);
     }
   };
-
   const handleAddNote = async (e) => {
     e.preventDefault();
     if (!noteText.trim()) return;
@@ -77,25 +69,19 @@ const TicketDetail = () => {
       setUpdating(false);
     }
   };
-
   if (loading) return <div className="p-16 text-center text-zinc-500 text-sm font-medium animate-pulse">Loading details...</div>;
   if (error || !ticket) return <div className="p-16 text-center text-rose-500 text-sm">{error || 'Ticket not found'}</div>;
-
   const cfg = statusConfig[ticket.status];
   const pCfg = priorityConfig[ticket.priority || 'Medium'];
   const isAgent = role === 'Agent';
-
   return (
     <div className="flex-1 overflow-auto bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] bg-zinc-950/95 bg-blend-overlay">
       <div className="p-8 max-w-4xl mx-auto space-y-6">
-        
-        {/* Header */}
         <div>
           <Link to="/" className="inline-flex items-center gap-2 text-zinc-500 hover:text-white transition-all duration-300 font-medium text-sm mb-6 hover:-translate-x-1">
             <ArrowLeft className="w-4 h-4" />
             {isAgent ? 'Back to Dashboard' : 'Back to My Tickets'}
           </Link>
-          
           <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-3">
@@ -108,9 +94,7 @@ const TicketDetail = () => {
               </div>
               <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">{ticket.subject}</h1>
             </div>
-            
             <div className="flex flex-col gap-3 min-w-[200px]">
-              {/* Status */}
               <div className="flex items-center justify-between gap-4 p-3 rounded-xl bg-zinc-900/40 backdrop-blur-md border border-zinc-800/80">
                 <span className="text-xs font-bold uppercase tracking-widest text-zinc-500">Status</span>
                 <div className="relative">
@@ -132,8 +116,6 @@ const TicketDetail = () => {
                   )}
                 </div>
               </div>
-
-              {/* Priority */}
               <div className="flex flex-col gap-2 p-3 rounded-xl bg-zinc-900/40 backdrop-blur-md border border-zinc-800/80">
                 <div className="flex items-center justify-between gap-4">
                   <span className="text-xs font-bold uppercase tracking-widest text-zinc-500">Priority</span>
@@ -155,7 +137,6 @@ const TicketDetail = () => {
                     </div>
                   )}
                 </div>
-                {/* Category - Only Agent Can Edit/See fully, but let's show read-only for customer */}
                 <div className="flex items-center justify-between gap-4 mt-2 border-t border-zinc-800/50 pt-2">
                   <span className="text-xs font-bold uppercase tracking-widest text-zinc-500">Category</span>
                   {isAgent ? (
@@ -180,8 +161,6 @@ const TicketDetail = () => {
             </div>
           </div>
         </div>
-
-        {/* Info Card */}
         <div className="bg-zinc-900/40 backdrop-blur-md rounded-2xl shadow-2xl border border-zinc-800/80 overflow-hidden">
           <div className="p-5 border-b border-zinc-800/50 flex items-center gap-4 bg-zinc-900/80">
             <div className="w-12 h-12 rounded-xl bg-zinc-800 flex items-center justify-center border border-zinc-700/50 shadow-inner">
@@ -197,8 +176,6 @@ const TicketDetail = () => {
             <p className="text-zinc-300 text-sm whitespace-pre-wrap leading-relaxed">{ticket.description}</p>
           </div>
         </div>
-
-        {/* Attachments (Placeholder) */}
         {ticket.attachments && ticket.attachments.length > 0 && (
           <div className="bg-zinc-900/40 backdrop-blur-md rounded-2xl shadow-2xl border border-zinc-800/80 p-6">
             <h4 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-4">Attachments</h4>
@@ -212,23 +189,17 @@ const TicketDetail = () => {
             </div>
           </div>
         )}
-
-        {/* Conversation Chat Interface */}
         <div className="flex flex-col pt-6 border-t border-zinc-800/50 min-h-[400px]">
           <h3 className="text-sm font-bold text-white flex items-center gap-2 uppercase tracking-widest mb-6">
             <MessageSquare className="w-4 h-4 text-zinc-500" />
             Conversation
           </h3>
-          
-          {/* Messages Area */}
           <div className="flex-1 space-y-6 mb-6 overflow-y-auto max-h-[500px] pr-2 custom-scrollbar">
             {ticket.notes && ticket.notes.length > 0 ? (
               ticket.notes.map((note) => {
                 const isMine = note.senderRole === role;
-                // If it's old data and missing senderRole, treat Agent as default sender for agents, else neutral
                 const senderRole = note.senderRole || 'Agent'; 
                 const isAgentMsg = senderRole === 'Agent';
-
                 return (
                   <div key={note._id} className={`flex ${isMine ? 'justify-end' : 'justify-start'}`}>
                     <div className={`max-w-[80%] flex flex-col ${isMine ? 'items-end' : 'items-start'}`}>
@@ -257,8 +228,6 @@ const TicketDetail = () => {
             )}
             <div ref={chatEndRef} />
           </div>
-
-          {/* Chat Input */}
           <form onSubmit={handleAddNote} className="bg-zinc-900/80 backdrop-blur-md p-3 rounded-2xl shadow-xl border border-zinc-800 focus-within:border-zinc-600 transition-colors flex flex-col gap-2">
             <textarea
               value={noteText}
@@ -267,7 +236,6 @@ const TicketDetail = () => {
               className="w-full max-h-32 min-h-[44px] py-2 px-3 bg-transparent border-none focus:ring-0 resize-none outline-none text-zinc-200 text-sm placeholder-zinc-500"
               rows={2}
             />
-            
             {selectedFile && (
               <div className="flex items-center gap-2 text-xs text-zinc-300 bg-zinc-800/50 px-3 py-1.5 rounded mx-2 mt-1 w-max">
                 <span className="truncate max-w-[150px]">{selectedFile.name}</span>
@@ -280,7 +248,6 @@ const TicketDetail = () => {
                 </button>
               </div>
             )}
-
             <div className="flex justify-between items-center px-1">
               <button 
                 type="button" 
@@ -301,7 +268,6 @@ const TicketDetail = () => {
                   }
                 }}
               />
-              
               <button
                 type="submit"
                 disabled={updating || !noteText.trim()}
@@ -316,5 +282,4 @@ const TicketDetail = () => {
     </div>
   );
 };
-
 export default TicketDetail;

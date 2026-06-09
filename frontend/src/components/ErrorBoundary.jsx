@@ -1,21 +1,15 @@
 import React from 'react';
-
 class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
     this.state = { hasError: false, error: null };
   }
-
   static getDerivedStateFromError(error) {
-    // Update state so the next render will show the fallback UI.
     return { hasError: true, error };
   }
-
   componentDidCatch(error, errorInfo) {
-    // Log the error to the console (or to an error reporting service like Sentry)
     console.error('Error caught by ErrorBoundary:', error, errorInfo);
   }
-
   render() {
     if (this.state.hasError) {
       return (
@@ -35,9 +29,7 @@ class ErrorBoundary extends React.Component {
         </div>
       );
     }
-
     return this.props.children;
   }
 }
-
 export default ErrorBoundary;
